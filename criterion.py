@@ -6,7 +6,8 @@ class RelativeDepthLoss(nn.Module):
     def __init__(self):
         super(RelativeDepthLoss, self).__init__()
 
-    def ranking_loss(self, z_A, z_B, target):
+    @staticmethod
+    def ranking_loss(z_A, z_B, target):
         """
         loss for a given set of pixels:
         z_A: predicted absolute depth for pixels A

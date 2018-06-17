@@ -1,22 +1,20 @@
-from collections import defaultdict
 from shutil import copyfile
-
 import torch
 from tqdm import tqdm_notebook
 from torch.utils.data import DataLoader
-from torch.autograd import Variable
 
 
-
-def prep_img(img):
-    return Variable(img.unsqueeze(0)).cuda()
+def prep_img(img, device):
+    return torch.Torch(img.unsqueeze(0)).to(device)
 
 
 class AverageMeter(object):
     """Computes and stores the average and current value"""
-
     def __init__(self):
-        self.reset()
+        self.val = 0
+        self.avg = 0
+        self.sum = 0
+        self.count = 0
 
     def reset(self):
         self.val = 0
@@ -31,20 +29,20 @@ class AverageMeter(object):
         self.avg = self.sum / self.count
 
 
-def _fit_epoch(model, loader, criterion, optimizer):
+def _fit_epoch(model, loader, criterion, optimizer, device):
     model.train()
     loss_meter = AverageMeter()
     t = tqdm_notebook(loader, total=len(loader))
     for data, target in t:
-        data = Variable(data.cuda())
-        target['x_A'] = target['x_A'].cuda()
-        target['y_A'] = target['y_A'].cuda()
-        target['x_B'] = target['x_B'].cuda()
-        target['y_B'] = target['y_B'].cuda()
-        target['ordinal_relation'] = Variable(target['ordinal_relation']).cuda()
+        data = data.to(device)
+        target['x_A'] = target['x_A'].to(device)
+        target['y_A'] = target['y_A'].to(device)
+        target['x_B'] = target['x_B'].to(device)
+        target['y_B'] = target['y_B'].to(device)
+        target['ordinal_relation'] = target['ordinal_relation'].to(device)
         output = model(data)
         loss = criterion(output, target)
-        loss_meter.update(loss.data[0])
+        loss_meter.update(loss.item())
         t.set_description("[ loss: {:.4f} ]".format(loss_meter.avg))
         optimizer.zero_grad()
         loss.backward()
@@ -53,31 +51,30 @@ def _fit_epoch(model, loader, criterion, optimizer):
     return loss_meter.avg
 
 
-def fit(model, train, criterion, optimizer, batch_size=32,
-        shuffle=True, nb_epoch=1, validation_data=None, cuda=True, num_workers=0):
-    # TODO: implement CUDA flags, optional metrics and lr scheduler
+def fit(model, train_data, criterion, optimizer, batch_size=32,
+        shuffle=True, device=None, nb_epoch=1, validation_data=None, num_workers=4):
     if validation_data:
-        print('Train on {} samples, Validate on {} samples'.format(len(train), len(validation_data)))
+        print('Train on {} samples, Validate on {} samples'.format(len(train_data), len(validation_data)))
     else:
-        print('Train on {} samples'.format(len(train)))
+        print('Train on {} samples'.format(len(train_data)))
 
-    train_loader = DataLoader(train, batch_size, shuffle, num_workers=num_workers, pin_memory=True)
+    train_loader = DataLoader(train_data, batch_size, shuffle, num_workers=num_workers, pin_memory=True)
     t = tqdm_notebook(range(nb_epoch), total=nb_epoch)
-    for epoch in t:
-        _fit_epoch(model, train_loader, criterion, optimizer)
+    for _ in t:
+        _fit_epoch(model, train_loader, criterion, optimizer, device)
 
 
-def validate(model, validation_data, criterion, batch_size):
+def validate(model, validation_data, criterion, batch_size, device):
     model.eval()
     val_loss = AverageMeter()
     loader = DataLoader(validation_data, batch_size=batch_size, shuffle=True)
     for data, target in loader:
-        data = Variable(data.cuda())
-        target['x_A'] = target['x_A'].cuda()
-        target['y_A'] = target['y_A'].cuda()
-        target['x_B'] = target['x_B'].cuda()
-        target['y_B'] = target['y_B'].cuda()
-        target['ordinal_relation'] = Variable(target['ordinal_relation']).cuda()
+        data = torch.Tensor(data, device=device)
+        target['x_A'] = target['x_A'].to(device)
+        target['y_A'] = target['y_A'].to(device)
+        target['x_B'] = target['x_B'].to(device)
+        target['y_B'] = target['y_B'].to(device)
+        target['ordinal_relation'] = target['ordinal_relation'].to(device)
         output = model(data)
         loss = criterion(output, target)
         val_loss.update(loss.data[0])

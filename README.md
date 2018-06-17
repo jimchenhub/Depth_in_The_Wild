@@ -10,14 +10,14 @@ Pytorch implementation of Single-Image Depth Perception in the Wild https://arxi
 - [ ] Validate Results
 
 ## Network Architecture: 
-![Network Architecture](hourglass_network.png)
+![Network Architecture](images/hourglass_network.png)
 
 ## Targets
-![target1](sample_input.jpg)
-![target2](sample_input2.jpg)
+![target1](images/sample_input.jpg)
+![target2](images/sample_input2.jpg)
 
 ## Outputs (120 epochs)
-![output1](sample_output1.jpg)
-![output2](sample_output2.jpg)
+![output1](images/sample_output1.jpg)
+![output2](images/sample_output2.jpg)
 
 
