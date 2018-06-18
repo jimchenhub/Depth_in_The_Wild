@@ -2,7 +2,7 @@
 import pandas as pd
 import pickle as pkl
 
-path = 'C:/Users/jimch/Documents/NYU/data/'
+path = '/home/jim/Documents/NYU/data/'
 
 
 def convert_depth(x):
@@ -32,8 +32,8 @@ def convert_labels(path):
         label['y_B'] = points[:, 3]
         label['ordinal_relation'] = points[:, 4]
         # print(len(points))
-        # if len(points) != 800:
-        #     continue
+        if len(points) != 800:
+            continue
         labels.append(label)
     return labels
 
@@ -59,16 +59,16 @@ print(len(labels_val))
 print(len(labels_val[0]))
 print(len(labels_val[0]["ordinal_relation"]))
 
-labels_test = convert_labels(path+'test_labels/654_NYU_MITpaper_test_imgs_orig_size_points.csv')
+# labels_test = convert_labels(path+'test_labels/654_NYU_MITpaper_test_imgs_orig_size_points.csv')
 
-print(len(labels_test))
-print(len(labels_test[0]))
-print(len(labels_test[0]["ordinal_relation"]))
+# print(len(labels_test))
+# print(len(labels_test[0]))
+# print(len(labels_test[0]["ordinal_relation"]))
 
 save(labels, path+'labels_train.pkl')
 save(labels_val, path+'labels_val.pkl')
-save(labels_test, path+'labels_test.pkl')
+# save(labels_test, path+'labels_test.pkl')
 
-labels = load(path+'labels_train.pkl')
-labels_val = load(path+'labels_val.pkl')
-labels_test = load(path+'labels_test.pkl')
+# labels = load(path+'labels_train.pkl')
+# labels_val = load(path+'labels_val.pkl')
+# labels_test = load(path+'labels_test.pkl')

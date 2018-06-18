@@ -1,6 +1,5 @@
 from shutil import copyfile
 import torch
-from tqdm import tqdm_notebook
 from torch.utils.data import DataLoader
 
 
@@ -32,7 +31,8 @@ class AverageMeter(object):
 def _fit_epoch(model, loader, criterion, optimizer, device):
     model.train()
     loss_meter = AverageMeter()
-    t = tqdm_notebook(loader, total=len(loader))
+    t = iter(loader)
+    count = 0
     for data, target in t:
         data = data.to(device)
         target['x_A'] = target['x_A'].to(device)
@@ -43,24 +43,28 @@ def _fit_epoch(model, loader, criterion, optimizer, device):
         output = model(data)
         loss = criterion(output, target)
         loss_meter.update(loss.item())
-        t.set_description("[ loss: {:.4f} ]".format(loss_meter.avg))
+        if count % 10 == 0:
+            print("[ iteration {:d}, loss: {:.6f} ]".format(count, loss_meter.avg))
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
+        count += 1
 
     return loss_meter.avg
 
 
-def fit(model, train_data, criterion, optimizer, batch_size=32,
-        shuffle=True, device=None, nb_epoch=1, validation_data=None, num_workers=4):
+def fit(model, train_data, criterion, optimizer, scheduler, device, batch_size=32,
+        shuffle=True, nb_epoch=1, validation_data=None, num_workers=4):
     if validation_data:
         print('Train on {} samples, Validate on {} samples'.format(len(train_data), len(validation_data)))
     else:
         print('Train on {} samples'.format(len(train_data)))
 
     train_loader = DataLoader(train_data, batch_size, shuffle, num_workers=num_workers, pin_memory=True)
-    t = tqdm_notebook(range(nb_epoch), total=nb_epoch)
-    for _ in t:
+    for i in range(nb_epoch):
+        print("epoch ", str(i+1))
+        scheduler.step()
+        print("learning rate: ", optimizer.param_groups[0]['lr'])
         _fit_epoch(model, train_loader, criterion, optimizer, device)
 
 
