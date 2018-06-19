@@ -2,7 +2,7 @@
 import pandas as pd
 import pickle as pkl
 
-path = '/home/jim/Documents/NYU/data/'
+path = 'C:/Users/jimch/Documents/NYU/data/'
 
 
 def convert_depth(x):

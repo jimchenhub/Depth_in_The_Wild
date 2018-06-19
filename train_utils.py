@@ -73,7 +73,7 @@ def validate(model, validation_data, criterion, batch_size, device):
     val_loss = AverageMeter()
     loader = DataLoader(validation_data, batch_size=batch_size, shuffle=True)
     for data, target in loader:
-        data = torch.Tensor(data, device=device)
+        data = data.to(device)
         target['x_A'] = target['x_A'].to(device)
         target['y_A'] = target['y_A'].to(device)
         target['x_B'] = target['x_B'].to(device)
@@ -81,7 +81,7 @@ def validate(model, validation_data, criterion, batch_size, device):
         target['ordinal_relation'] = target['ordinal_relation'].to(device)
         output = model(data)
         loss = criterion(output, target)
-        val_loss.update(loss.data[0])
+        val_loss.update(loss.item())
     return val_loss.avg
 
 
@@ -92,3 +92,8 @@ def save_checkpoint(model_state, optimizer_state, filename, epoch=None, is_best=
     torch.save(state, filename)
     if is_best:
         copyfile(filename, 'model_best.pth.tar')
+
+
+def load_checkpoint(filename):
+    state = torch.load(filename)
+    return state['model_state']

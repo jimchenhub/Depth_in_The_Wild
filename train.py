@@ -3,13 +3,13 @@ from torchvision import transforms
 from torch.optim import RMSprop
 from torch.optim.lr_scheduler import MultiStepLR
 import torch
-# import matplotlib.pyplot as plt
 
 from datasets import NYUDepth
 from models import HourGlass
 from criterion import RelativeDepthLoss
 from train_utils import fit, save_checkpoint
 from torch.backends import cudnn
+from config import PATH_PREFIX
 
 
 def main(data_path, label_path, nb_epoch, save_path, device, start_path=None,
@@ -30,22 +30,16 @@ def main(data_path, label_path, nb_epoch, save_path, device, start_path=None,
     history = fit(hourglass, train_data, criterion, optimizer, scheduler, device,
                   batch_size=batch_size, nb_epoch=nb_epoch)
     save_checkpoint(hourglass.state_dict(), optimizer.state_dict(), save_path)
-    # if plot_history:
-    #     plt.plot(history['loss'], label='loss')
-    #     plt.xlabel('epoch')
-    #     plt.ylabel('relative depth loss')
-    #     plt.legend()
-    #     plt.show()
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--data_path', type=str, default='/home/jim/Documents/NYU/data/795_NYU_MITpaper_train_imgs')
-    parser.add_argument('--label_path', type=str, default='/home/jim/Documents/NYU/data/labels_train.pkl')
-    parser.add_argument('--nb_epoch', default=10, type=int, help='Epochs')
-    parser.add_argument('--save_path', default="/home/jim/Documents/GitHub/Depth_in_The_Wild/results/test_result.pth")
+    parser.add_argument('--data_path', type=str, default=PATH_PREFIX+'Documents/NYU/data/795_NYU_MITpaper_train_imgs')
+    parser.add_argument('--label_path', type=str, default=PATH_PREFIX+'Documents/NYU/data/labels_train.pkl')
+    parser.add_argument('--nb_epoch', default=3, type=int, help='Epochs')
+    parser.add_argument('--save_path', default=PATH_PREFIX+"Documents/GitHub/Depth_in_The_Wild/results/test_result.pth")
     parser.add_argument('--start_path', default=None)
-    parser.add_argument('--batch_size', default=8)
+    parser.add_argument('--batch_size', default=4)
     parser.add_argument('--lr', default=1e-3)
     args = parser.parse_args()
     # start training
