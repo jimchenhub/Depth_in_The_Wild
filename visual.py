@@ -3,7 +3,7 @@ import torch
 import cv2
 import h5py
 import numpy as np
-
+from config import PATH_PREFIX
 
 cmap = plt.cm.plasma
 def colored_depthmap(depth, d_min=None, d_max=None):
@@ -25,10 +25,10 @@ def colored_depthmap(depth, d_min=None, d_max=None):
 
 
 if __name__ == '__main__':
-    with h5py.File('C:/Users/jimch/Documents/NYU/data/654_NYU_MITpaper_test_imgs_orig_size/1_depth.h5') as f:
+    with h5py.File(PATH_PREFIX+'Documents/NYU/data/654_NYU_MITpaper_test_imgs_orig_size/1_depth.h5') as f:
         depth_map = f["depth"][:]
     depth_map = torch.Tensor(depth_map)
     colored_map = colored_depthmap(depth_map)
-    cv2.imshow('test', colored_map)
+    cv2.imshow('test.png', colored_map)
     cv2.waitKey(0)
     cv2.destroyWindow('test')

@@ -9,6 +9,7 @@ import torch
 from models import HourGlass
 from torch.backends import cudnn
 from visual import colored_depthmap
+from train_utils import load_checkpoint
 from config import PATH_PREFIX
 
 

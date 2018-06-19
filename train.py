@@ -19,7 +19,7 @@ def main(data_path, label_path, nb_epoch, save_path, device, start_path=None,
     hourglass = HourGlass()
     hourglass = hourglass.cuda()
     optimizer = RMSprop(hourglass.parameters(), lr)
-    scheduler = MultiStepLR(optimizer, milestones=[3, 6], gamma=0.1)
+    scheduler = MultiStepLR(optimizer, milestones=[10, 20], gamma=0.1)
 
     if start_path:
         experiment = torch.load(start_path)
@@ -36,10 +36,10 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--data_path', type=str, default=PATH_PREFIX+'Documents/NYU/data/795_NYU_MITpaper_train_imgs')
     parser.add_argument('--label_path', type=str, default=PATH_PREFIX+'Documents/NYU/data/labels_train.pkl')
-    parser.add_argument('--nb_epoch', default=3, type=int, help='Epochs')
+    parser.add_argument('--nb_epoch', default=30, type=int, help='Epochs')
     parser.add_argument('--save_path', default=PATH_PREFIX+"Documents/GitHub/Depth_in_The_Wild/results/test_result.pth")
     parser.add_argument('--start_path', default=None)
-    parser.add_argument('--batch_size', default=4)
+    parser.add_argument('--batch_size', default=8)
     parser.add_argument('--lr', default=1e-3)
     args = parser.parse_args()
     # start training
