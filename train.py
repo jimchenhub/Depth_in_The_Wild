@@ -21,7 +21,7 @@ def main(train_data_path, train_label_path, val_data_path, val_label_path,
     val_data = NYUDepth(val_data_path, val_label_path, transforms=transforms.ToTensor())
     hourglass = HourGlass()
     hourglass = hourglass.cuda()
-    optimizer = RMSprop(hourglass.parameters(), lr)
+    optimizer = RMSprop(hourglass.parameters(), lr, weight_decay=1e-5)
     # scheduler = MultiStepLR(optimizer, milestones=[10, 20], gamma=0.1)
     scheduler = None
 
@@ -31,14 +31,16 @@ def main(train_data_path, train_label_path, val_data_path, val_label_path,
         optimizer.load_state_dict(experiment['optimizer_state'])
     criterion = RelativeDepthLoss()
 
-    history = fit(hourglass, train_data, val_data, criterion, optimizer, scheduler, device,
-                  batch_size=batch_size, nb_epoch=nb_epoch)
-    # save final model
+    # save path
     t_now = datetime.datetime.now()
     t = t_now.strftime("%Y-%m-%d-%H-%M-%S")
     save_path = os.path.join(save_path, t)
     if not os.path.isdir(save_path):
         os.mkdir(save_path)
+
+    history = fit(hourglass, train_data, val_data, criterion, optimizer, scheduler, 
+                  save_path, device, batch_size=batch_size, nb_epoch=nb_epoch)
+    # save final model
     save_checkpoint(hourglass.state_dict(), optimizer.state_dict(), os.path.join(save_path, "test_result.pth"))
 
 
@@ -52,7 +54,7 @@ if __name__ == '__main__':
                         default=PATH_PREFIX+'Documents/NYU/data/795_NYU_MITpaper_train_imgs')
     parser.add_argument('--val_label_path', type=str, 
                         default=PATH_PREFIX+'Documents/NYU/data/labels_val.pkl')
-    parser.add_argument('--nb_epoch', default=500, type=int, help='Epochs')
+    parser.add_argument('--nb_epoch', default=50, type=int, help='Epochs')
     parser.add_argument('--save_path', default=PATH_PREFIX+"Documents/GitHub/Depth_in_The_Wild/results/")
     parser.add_argument('--start_path', default=None)
     parser.add_argument('--batch_size', default=4)

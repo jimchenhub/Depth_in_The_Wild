@@ -1,8 +1,10 @@
+import os
 from shutil import copyfile
 import datetime
 import torch
 from torch.utils.data import DataLoader
 from metrics import Metrics
+import test
 
 
 def prep_img(img, device):
@@ -43,6 +45,7 @@ def _fit_epoch(model, loader, criterion, optimizer, device):
         target['y_B'] = target['y_B'].to(device)
         target['ordinal_relation'] = target['ordinal_relation'].to(device)
         output = model(data)
+        output = torch.exp(output)
         loss = criterion(output, target)
         loss_meter.update(loss.item())
         if count % 10 == 0:
@@ -57,8 +60,8 @@ def _fit_epoch(model, loader, criterion, optimizer, device):
     return loss_meter.avg
 
 
-def fit(model, train_data, val_data, criterion, optimizer, scheduler, device, 
-        batch_size=32, shuffle=True, nb_epoch=1, num_workers=4):
+def fit(model, train_data, val_data, criterion, optimizer, scheduler, save_path,
+        device, batch_size=32, shuffle=True, nb_epoch=1, num_workers=4):
     if val_data:
         print('Train on {} samples, Validate on {} samples'.format(len(train_data), len(val_data)))
     else:
@@ -74,6 +77,12 @@ def fit(model, train_data, val_data, criterion, optimizer, scheduler, device,
         # validate
         val_loss = validate(model, val_data, criterion, 1, device)
         print("validation loss is:   %f" % val_loss)
+        # save checkpoint
+        save_checkpoint(model.state_dict(), optimizer.state_dict(), 
+                        os.path.join(save_path, "checkpoint_epoch_"+str(i)+".pth"))
+        if i % 10 == 0:
+            test.test('/home/jim/Documents/NYU/data/test_list.txt',
+                      os.path.join(save_path, "checkpoint_epoch_"+str(i)+".pth"), device)
 
 
 def validate(model, validation_data, criterion, batch_size, device):
@@ -89,6 +98,7 @@ def validate(model, validation_data, criterion, batch_size, device):
         target['y_B'] = target['y_B'].to(device)
         target['ordinal_relation'] = target['ordinal_relation'].to(device)
         output = model(data)
+        output = torch.exp(output)
         loss = criterion(output, target)
         val_loss.update(loss.item())
         # metrics calculate

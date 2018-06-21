@@ -1,9 +1,9 @@
 import os
 import pickle
 
+import torch
 from PIL import Image
 from torch.utils.data import Dataset
-
 
 class NYUDepth(Dataset):
     def __init__(self, path_img, path_target, transforms=None):
